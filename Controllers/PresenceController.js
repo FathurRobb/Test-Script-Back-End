@@ -1,27 +1,34 @@
 
-const sequelize = require('../Database/Config');
 const Presence = require('../Models/Presence');
-const User = require('../Models/User');
 const { jwtAuthVerify } = require('../Helpers/Jwt');
 
 module.exports = {
     indexPresence: async (req, res) => {
         try {
-            let query = { 
-                include: ['user'],
-            };
-            const presence = await Presence.findAll(query);
+            const presenceIn = await Presence.findAll({include: ['user'], where: [{'type':'IN'}]});
+            const presenceOut = await Presence.findAll({include: ['user'], where: [{'type':'OUT'}]});
             
-            const data = presence.map(p => ({
-                id_user: p.user.id,
-                nama_user: p.user.nama,
-                type: p.type,
-                is_approve: p.is_approve === true ? "APPROVED" : "REJECT",
-                tanggal: p.waktu
+            const dataPresenceIn = presenceIn.map(pi => ({
+                id_user: pi.user.id,
+                nama_user: pi.user.nama,
+                tanggal: new Date(pi.waktu).getFullYear()+"-"+("0" + (new Date(pi.waktu).getMonth() + 1)).slice(-2)+"-"+("0" + new Date(pi.waktu).getDate()).slice(-2),
+                waktu_masuk: ("0" + new Date(pi.waktu).getHours()).slice(-2)+":"+("0" + new Date(pi.waktu).getMinutes()).slice(-2)+":"+("0" + new Date(pi.waktu).getSeconds()).slice(-2),
+                status_masuk: pi.is_approve === true ? "APPROVED" : "REJECT",                
             }));
+
+            const dataPresenceOut = presenceOut.map(po => ({
+                id_user: po.user.id,
+                nama_user: po.user.nama,
+                tanggal: new Date(po.waktu).getFullYear()+"-"+("0" + (new Date(po.waktu).getMonth() + 1)).slice(-2)+"-"+("0" + new Date(po.waktu).getDate()).slice(-2),
+                waktu_pulang: ("0" + new Date(po.waktu).getHours()).slice(-2)+":"+("0" + new Date(po.waktu).getMinutes()).slice(-2)+":"+("0" + new Date(po.waktu).getSeconds()).slice(-2),
+                status_pulang: po.is_approve === true ? "APPROVED" : "REJECT",                
+            }));
+
+            const result = dataPresenceIn.map(dpi => ({ ...dpi, ...dataPresenceOut.find(dpo => dpo.id_user === dpi.id_user && dpo.tanggal === dpi.tanggal ) }));
+
             return res.status(200).json({
                 message: "Success get data",
-                data
+                data: result
             });
         } catch (error) {
             console.error(error);
