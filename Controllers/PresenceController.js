@@ -1,10 +1,34 @@
+
+const sequelize = require('../Database/Config');
 const Presence = require('../Models/Presence');
 const User = require('../Models/User');
 const { jwtAuthVerify } = require('../Helpers/Jwt');
 
 module.exports = {
     indexPresence: async (req, res) => {
-
+        try {
+            let query = { 
+                include: ['user'],
+            };
+            const presence = await Presence.findAll(query);
+            
+            const data = presence.map(p => ({
+                id_user: p.user.id,
+                nama_user: p.user.nama,
+                type: p.type,
+                is_approve: p.is_approve === true ? "APPROVED" : "REJECT",
+                tanggal: p.waktu
+            }));
+            return res.status(200).json({
+                message: "Success get data",
+                data
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                message: error
+            });
+        }
     },
 
     indexPresenceById: async (req, res) => {

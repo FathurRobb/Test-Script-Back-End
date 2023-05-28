@@ -19,6 +19,6 @@ Presence.init({
     deletedAt: true,
 });
 
-Presence.belongsTo(User, { foreignKey: 'id_user', as: 'user', onDelete: 'CASCADE' });
+Presence.belongsTo(User, { foreignKey: 'id_users', as: 'user', onDelete: 'CASCADE' });
 
 module.exports = Presence;
