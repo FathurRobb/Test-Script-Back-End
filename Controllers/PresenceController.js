@@ -30,6 +30,29 @@ module.exports = {
     },
 
     updatePresence: async (req, res) => {
+        const { id } = req.params;
+        try {
+            const existsPresence = await Presence.findOne({
+                where: {
+                    id
+                },
+            });
+    
+            if (existsPresence) {
+                await Presence.update(req.body, {where: { id }})
+                return res.status(200).json({
+                    message: "Presence has been edited",
+                });
+            } else {
+                return res.status(404).json({
+                    message: "Presence not found",
+                });
+            }
+        } catch (error) {
+            return res.status(500).json({
+                message: error
+            });
+        }
 
     },
 

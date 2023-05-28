@@ -12,7 +12,7 @@ module.exports = {
     },
 
     storeUser: async (req, res) => {
-        const { nama, email, npp, npp_superivsor, password } = req.body;
+        const { nama, email, npp, npp_supervisor, password } = req.body;
         try {
             const emailExists = await User.findOne({
                 where: {
@@ -26,7 +26,7 @@ module.exports = {
                 });
             }
 
-            await User.create({ nama, email, npp, npp_superivsor, password });
+            await User.create({ nama, email, npp, npp_supervisor, password });
             return res.status(201).json({
                 message: "User created successfully"
             });
